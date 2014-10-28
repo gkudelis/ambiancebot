@@ -22,16 +22,15 @@ while True:
         c.execute("SELECT SUM(cnt) FROM words")
         total_count, = c.fetchone()
 
-        while not new_word_found:
-            # pick a random number
-            r = randint(1, total_count)
+        # pick a random number
+        r = randint(1, total_count)
 
-            # go over results and pick one
-            csum = 0
-            for word, cnt in c.execute("SELECT word, cnt FROM words"):
-                csum += cnt
-                if r <= csum:
-                    break
+        # go over results and pick one
+        csum = 0
+        for word, cnt in c.execute("SELECT word, cnt FROM words"):
+            csum += cnt
+            if r <= csum:
+                break
 
         print "trying to tweet '" + word + "'"
         t.update_status(status=word)
