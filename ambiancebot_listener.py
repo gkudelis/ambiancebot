@@ -27,14 +27,7 @@ class InStream(TwythonStreamer):
                     c.execute("UPDATE words SET cnt=? where word=?", (cnt+1, w))
                 except TypeError:
                     c.execute("INSERT INTO words (word, cnt) VALUES (?, 1)", (w,))
-
-                has_committed = False
-                while not has_commited:
-                    try:
-                        db.commit()
-                        has_commited = True
-                    except sqlite3.OperationalError:
-                        time.sleep(1)
+                db.commit()
 
 
     def on_error(self, status_code, data):

@@ -15,7 +15,6 @@ t = Twython(settings.app_key,
         settings.oauth_token,
         settings.oauth_token_secret)
 
-lastword = ''
 while True:
     try:
         # get total count of words in db
