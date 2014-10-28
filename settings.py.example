@@ -1,0 +1,4 @@
+app_key = "something"
+app_secret = "here"
+oauth_token = "get it"
+oauth_token_secret = "from twitter"
