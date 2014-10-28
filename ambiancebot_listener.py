@@ -9,9 +9,18 @@ class InStream(TwythonStreamer):
     def on_success(self, data):
         if 'text' in data:
             print "analyzing '" + data['text'] + "'"
+            # find words
             ws = filter(lambda match: match != '',
                 re.findall(r'$| ([a-zA-Z-]+)', data['text'].encode('utf-8')))
-            for w in map(lambda word: word.lower(), ws):
+            # turn into lower case words
+            ws = map(lambda word: word.lower(), ws)
+
+            # digrams please
+            digrams = reduce(lambda dis, w: dis + [(dis[-1][1], w)], ws, [('','')])[2:]
+            print "found digrams: " + str(digrams)
+
+            # record findings
+            for w in ws:
                 c.execute("SELECT cnt FROM words WHERE word=?", (w,))
                 try:
                     cnt, = c.fetchone()
