@@ -1,13 +1,13 @@
-import settings
-from digram import Digram
-
 import time
 from random import randint
 
-from dynamodb_mapper.model import ConnectionBorg
-
 from twython import Twython
 from twython.exceptions import TwythonError
+from dynamodb_mapper.model import ConnectionBorg
+
+import settings
+from digram import Digram
+
 
 cb = ConnectionBorg()
 cb.set_region('eu-west-1')
@@ -19,24 +19,64 @@ t = Twython(settings.app_key,
         settings.oauth_token_secret)
 
 while True:
-    try:
-        # get total count of words in db
-        c.execute("SELECT SUM(cnt) FROM words")
-        total_count, = c.fetchone()
+    tweet = ''
+    last_word = ''
 
-        # pick a random number
-        r = randint(1, total_count)
+    # get all digrams in db
+    ds = Digram.scan()
+    # count total number of digrams on the db
+    total_count = 0
+    for d in ds:
+        total_count += d.count
+    # pick a random digram
+    r = randint(1, total_count)
+    print 'r = '+str(r)
+    ds = Digram.scan()
+    csum = 0
+    for d in ds:
+        csum += d.count
+        print 'csum = '+str(csum)
+        if r <= csum:
+            tweet += d.w1 + ' ' + d.w2
+            last_word = d.w2
+            print last_word
+            break
 
-        # go over results and pick one
-        csum = 0
-        for word, cnt in c.execute("SELECT word, cnt FROM words"):
-            csum += cnt
-            if r <= csum:
-                break
+    # third word
+    ds = Digram.query(last_word)
+    total_count = 0
+    for d in ds:
+        total_count += d.count
+    if total_count == 0:
+        continue
+    r = randint(1, total_count)
+    ds = Digram.query(last_word)
+    csum = 0
+    for d in ds:
+        csum += d.count
+        if r <= csum:
+            tweet += ' ' + d.w2
+            last_word = d.w2
+            break
 
-        print "trying to tweet '" + word + "'"
-        t.update_status(status=word)
-    except TwythonError:
-        time.sleep(60)
-    else:
-        time.sleep(10*60)
+    # fourth word
+    ds = Digram.query(last_word)
+    total_count = 0
+    for d in ds:
+        total_count += d.count
+    if total_count == 0:
+        continue
+    r = randint(1, total_count)
+    ds = Digram.query(last_word)
+    csum = 0
+    for d in ds:
+        csum += d.count
+        if r <= csum:
+            tweet += ' ' + d.w2
+            last_word = d.w2
+            break
+
+    print "tweeting '" + tweet + "'"
+    t.update_status(status=tweet)
+
+    time.sleep(5*60)
