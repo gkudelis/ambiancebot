@@ -2,3 +2,6 @@ app_key = "something"
 app_secret = "here"
 oauth_token = "get it"
 oauth_token_secret = "from twitter"
+
+aws_access_key_id = "get this"
+aws_secret_access_key = "from amazon"

@@ -1,14 +1,17 @@
 import settings
+from digram import Digram
 
-import time, sqlite3
+import time
 from random import randint
+
+from dynamodb_mapper.model import ConnectionBorg
 
 from twython import Twython
 from twython.exceptions import TwythonError
 
-
-db = sqlite3.connect('words.db')
-c = db.cursor()
+cb = ConnectionBorg()
+cb.set_region('eu-west-1')
+cb.set_credentials(settings.aws_access_key_id, settings.aws_secret_access_key)
 
 t = Twython(settings.app_key,
         settings.app_secret,
