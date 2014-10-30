@@ -1,9 +1,16 @@
-import settings
-import re, sqlite3
-from twython import TwythonStreamer
+import re
 
-db = sqlite3.connect('words.db')
-c = db.cursor()
+from twython import TwythonStreamer
+from dynamodb_mapper.model import ConnectionBorg
+from boto.dynamodb.exceptions import DynamoDBKeyNotFoundError
+
+import settings
+from digram import Digram
+
+
+cb = ConnectionBorg()
+cb.set_region('eu-west-1')
+cb.set_credentials(settings.aws_access_key_id, settings.aws_secret_access_key)
 
 class InStream(TwythonStreamer):
     def on_success(self, data):
@@ -19,16 +26,15 @@ class InStream(TwythonStreamer):
             digrams = reduce(lambda dis, w: dis + [(dis[-1][1], w)], ws, [('','')])[2:]
             print "found digrams: " + str(digrams)
 
-            # record findings
-            for w in ws:
-                c.execute("SELECT cnt FROM words WHERE word=?", (w,))
+            for di in digrams:
                 try:
-                    cnt, = c.fetchone()
-                    c.execute("UPDATE words SET cnt=? where word=?", (cnt+1, w))
-                except TypeError:
-                    c.execute("INSERT INTO words (word, cnt) VALUES (?, 1)", (w,))
-                db.commit()
-
+                    d_rec = Digram.get(di[0], di[1])
+                except DynamoDBKeyNotFoundError:
+                    d_rec = Digram()
+                    d_rec.w1 = di[0]
+                    d_rec.w2 = di[1]
+                d_rec.count += 1
+                d_rec.save()
 
     def on_error(self, status_code, data):
         print status_code
