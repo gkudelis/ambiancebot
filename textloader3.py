@@ -1,4 +1,4 @@
-import sys, re
+import sys, re, time
 
 from dynamodb_mapper.model import ConnectionBorg
 from boto.dynamodb.exceptions import DynamoDBKeyNotFoundError
@@ -33,3 +33,4 @@ for line in open(sys.argv[1], 'r'):
             t_rec.w3 = tg[2]
         t_rec.count += 1
         t_rec.save()
+        time.sleep(0.15)
