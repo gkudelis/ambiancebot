@@ -5,7 +5,7 @@ from dynamodb_mapper.model import ConnectionBorg
 from boto.dynamodb.exceptions import DynamoDBKeyNotFoundError
 
 import settings
-from digram import Digram
+from trigram import Trigram
 
 
 cb = ConnectionBorg()
@@ -22,19 +22,21 @@ class InStream(TwythonStreamer):
             # turn into lower case words
             ws = map(lambda word: word.lower(), ws)
 
-            # digrams please
-            digrams = reduce(lambda dis, w: dis + [(dis[-1][1], w)], ws, [('','')])[2:]
-            print "found digrams: " + str(digrams)
+            # trigrams please
+            trigrams = reduce(
+                lambda tris, w: tris + [(tris[-1][1], tris[-1][2], w)],
+                ws, [('','','')])[3:]
+            print "found trigrams: " + str(trigrams)
 
-            for di in digrams:
+            for tg in trigrams:
                 try:
-                    d_rec = Digram.get(di[0], di[1])
+                    t_rec = Trigram.get(tg[0]+','+tg[1], tg[2])
                 except DynamoDBKeyNotFoundError:
-                    d_rec = Digram()
-                    d_rec.w1 = di[0]
-                    d_rec.w2 = di[1]
-                d_rec.count += 1
-                d_rec.save()
+                    t_rec = Trigram()
+                    t_rec.w12 = tg[0]+','+tg[1]
+                    t_rec.w3 = tg[2]
+                t_rec.count += 1
+                t_rec.save()
 
     def on_error(self, status_code, data):
         print status_code
