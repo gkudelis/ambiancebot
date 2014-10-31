@@ -19,47 +19,50 @@ t = Twython(settings.app_key,
         settings.oauth_token_secret)
 
 while True:
-    tweet = ''
-    last_word = ''
+    try:
+        tweet = ''
+        last_word = ''
 
-    # get all digrams in db
-    ds = Digram.scan()
-    # count total number of digrams on the db
-    total_count = 0
-    for d in ds:
-        total_count += d.count
-    # pick a random digram
-    r = randint(1, total_count)
-    print 'r = '+str(r)
-    ds = Digram.scan()
-    csum = 0
-    for d in ds:
-        csum += d.count
-        print 'csum = '+str(csum)
-        if r <= csum:
-            tweet += d.w1
-            last_word = d.w2
-            break
-
-    while len(tweet)+len(last_word)+1 <= 80:
-        tweet += ' ' + last_word
-
-        ds = Digram.query(last_word)
+        # get all digrams in db
+        ds = Digram.scan()
+        # count total number of digrams on the db
         total_count = 0
         for d in ds:
             total_count += d.count
-        if total_count == 0:
-            break
+        # pick a random digram
         r = randint(1, total_count)
-        ds = Digram.query(last_word)
+        print 'r = '+str(r)
+        ds = Digram.scan()
         csum = 0
         for d in ds:
             csum += d.count
+            print 'csum = '+str(csum)
             if r <= csum:
+                tweet += d.w1
                 last_word = d.w2
                 break
 
-    print "tweeting '" + tweet + "'"
-    t.update_status(status=tweet)
+        while len(tweet)+len(last_word)+1 <= 80:
+            tweet += ' ' + last_word
 
-    time.sleep(settings.interval*60)
+            ds = Digram.query(last_word)
+            total_count = 0
+            for d in ds:
+                total_count += d.count
+            if total_count == 0:
+                break
+            r = randint(1, total_count)
+            ds = Digram.query(last_word)
+            csum = 0
+            for d in ds:
+                csum += d.count
+                if r <= csum:
+                    last_word = d.w2
+                    break
+
+        print "tweeting '" + tweet + "'"
+        t.update_status(status=tweet)
+    except TwythonError:
+        time.sleep(60)
+    else:
+        time.sleep(settings.interval*60)
