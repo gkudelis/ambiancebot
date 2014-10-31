@@ -37,44 +37,27 @@ while True:
         csum += d.count
         print 'csum = '+str(csum)
         if r <= csum:
-            tweet += d.w1 + ' ' + d.w2
-            last_word = d.w2
-            print last_word
-            break
-
-    # third word
-    ds = Digram.query(last_word)
-    total_count = 0
-    for d in ds:
-        total_count += d.count
-    if total_count == 0:
-        continue
-    r = randint(1, total_count)
-    ds = Digram.query(last_word)
-    csum = 0
-    for d in ds:
-        csum += d.count
-        if r <= csum:
-            tweet += ' ' + d.w2
+            tweet += d.w1
             last_word = d.w2
             break
 
-    # fourth word
-    ds = Digram.query(last_word)
-    total_count = 0
-    for d in ds:
-        total_count += d.count
-    if total_count == 0:
-        continue
-    r = randint(1, total_count)
-    ds = Digram.query(last_word)
-    csum = 0
-    for d in ds:
-        csum += d.count
-        if r <= csum:
-            tweet += ' ' + d.w2
-            last_word = d.w2
+    while len(tweet)+len(last_word)+1 <= 80:
+        tweet += ' ' + last_word
+
+        ds = Digram.query(last_word)
+        total_count = 0
+        for d in ds:
+            total_count += d.count
+        if total_count == 0:
             break
+        r = randint(1, total_count)
+        ds = Digram.query(last_word)
+        csum = 0
+        for d in ds:
+            csum += d.count
+            if r <= csum:
+                last_word = d.w2
+                break
 
     print "tweeting '" + tweet + "'"
     t.update_status(status=tweet)
