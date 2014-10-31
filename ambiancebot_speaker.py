@@ -6,14 +6,14 @@ from twython.exceptions import TwythonError
 from dynamodb_mapper.model import ConnectionBorg
 
 import settings
-from digram import Digram
+from trigram import Trigram
 
 
 cb = ConnectionBorg()
 cb.set_region('eu-west-1')
 cb.set_credentials(settings.aws_access_key_id, settings.aws_secret_access_key)
 
-t = Twython(settings.app_key,
+tw = Twython(settings.app_key,
         settings.app_secret,
         settings.oauth_token,
         settings.oauth_token_secret)
@@ -24,44 +24,44 @@ while True:
         last_word = ''
 
         # get all digrams in db
-        ds = Digram.scan()
+        ts = Trigram.scan()
         # count total number of digrams on the db
         total_count = 0
-        for d in ds:
-            total_count += d.count
+        for t in ts:
+            total_count += t.count
         # pick a random digram
         r = randint(1, total_count)
         print 'r = '+str(r)
-        ds = Digram.scan()
+        ts = Trigram.scan()
         csum = 0
-        for d in ds:
-            csum += d.count
+        for t in ts:
+            csum += t.count
             print 'csum = '+str(csum)
             if r <= csum:
-                tweet += d.w1
-                last_word = d.w2
+                tweet += ' '.join(t.w12.split(','))
+                last_pair = (t.w12.split(',')[1], t.w3)
                 break
 
-        while len(tweet)+len(last_word)+1 <= 80:
-            tweet += ' ' + last_word
+        while len(tweet)+len(last_pair[1])+1 <= 80:
+            tweet += ' ' + last_pair[1]
 
-            ds = Digram.query(last_word)
+            ts = Trigram.query(','.join(last_pair))
             total_count = 0
-            for d in ds:
-                total_count += d.count
+            for t in ts:
+                total_count += t.count
             if total_count == 0:
                 break
             r = randint(1, total_count)
-            ds = Digram.query(last_word)
+            ts = Trigram.query(','.join(last_pair))
             csum = 0
-            for d in ds:
-                csum += d.count
+            for t in ts:
+                csum += t.count
                 if r <= csum:
-                    last_word = d.w2
+                    last_pair = (t.w12.split(',')[1], t.w3)
                     break
 
         print "tweeting '" + tweet + "'"
-        t.update_status(status=tweet)
+        tw.update_status(status=tweet)
     except TwythonError:
         time.sleep(60)
     else:
