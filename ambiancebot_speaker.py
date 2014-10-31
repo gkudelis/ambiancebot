@@ -62,4 +62,4 @@ while True:
     print "tweeting '" + tweet + "'"
     t.update_status(status=tweet)
 
-    time.sleep(5*60)
+    time.sleep(settings.interval*60)
