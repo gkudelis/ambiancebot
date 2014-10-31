@@ -18,7 +18,7 @@ class InStream(TwythonStreamer):
             print "analyzing '" + data['text'] + "'"
             # find words
             ws = filter(lambda match: match != '',
-                re.findall(r'$| ([a-zA-Z-]+)', data['text'].encode('utf-8')))
+                re.findall(r"$| ([a-zA-Z-']+)", data['text'].encode('utf-8')))
             # turn into lower case words
             ws = map(lambda word: word.lower(), ws)
 
