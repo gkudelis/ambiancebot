@@ -33,4 +33,4 @@ for line in open(sys.argv[1], 'r'):
             t_rec.w3 = tg[2]
         t_rec.count += 1
         t_rec.save()
-        time.sleep(0.15)
+        time.sleep(0.2)
