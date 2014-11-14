@@ -65,4 +65,8 @@ while True:
     except TwythonError:
         time.sleep(60)
     else:
-        time.sleep(settings.interval*60)
+        # 1/6 chance to tweet every 1/6th of the set interval
+        tweet_again = False
+        while not tweet_again:
+            time.sleep(settings.interval*10)
+            tweet_again = (randint(1,6) == 6)
