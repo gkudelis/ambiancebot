@@ -69,4 +69,6 @@ while True:
         tweet_again = False
         while not tweet_again:
             time.sleep(settings.interval*10)
-            tweet_again = (randint(1,6) == 6)
+            r = randint(1,6)
+            print "random: " + str(r)
+            tweet_again = (r == 6)
